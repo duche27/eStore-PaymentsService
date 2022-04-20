@@ -32,7 +32,7 @@ public class PaymentAggregate {
                 .orderId(processPaymentCommand.getOrderId())
                 .build();
 
-        // publicamos evento y mandamos al eventHandler
+        // publicamos evento y mandamos al eventHandler y a SAGA
         AggregateLifecycle.apply(paymentProcessedEvent);
     }
 

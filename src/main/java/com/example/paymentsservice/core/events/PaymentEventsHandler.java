@@ -22,19 +22,6 @@ public class PaymentEventsHandler {
         this.paymentRepository = paymentRepository;
     }
 
-    // lanza la excepción controlada si no persiste paymentEntity
-    // sin persistir nada, es transaccional
-    // de aquí va a PaymentServiceEventHandler - después a PaymentErrorHandler - excepción controlada
-    @ExceptionHandler(resultType = Exception.class)
-    private void handle(Exception exception) throws Exception {
-        throw exception;
-    }
-
-    @ExceptionHandler(resultType = IllegalArgumentException.class)
-    private void handle(IllegalArgumentException exception) throws IllegalArgumentException {
-//        throw IllegalArgumentException;
-    }
-
     @EventHandler
     public void on(PaymentProcessedEvent paymentProcessedEvent) {
 
@@ -47,5 +34,18 @@ public class PaymentEventsHandler {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    // lanza la excepción controlada si no persiste paymentEntity
+    // sin persistir nada, es transaccional
+    // de aquí va a PaymentServiceEventHandler - después a PaymentErrorHandler - excepción controlada
+    @ExceptionHandler(resultType = Exception.class)
+    private void handle(Exception exception) throws Exception {
+        throw exception;
+    }
+
+    @ExceptionHandler(resultType = IllegalArgumentException.class)
+    private void handle(IllegalArgumentException exception) throws IllegalArgumentException {
+//        throw IllegalArgumentException;
     }
 }
