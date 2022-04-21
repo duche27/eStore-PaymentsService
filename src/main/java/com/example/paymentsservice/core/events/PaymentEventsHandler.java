@@ -2,6 +2,7 @@ package com.example.paymentsservice.core.events;
 
 import com.example.paymentsservice.model.PaymentEntity;
 import com.example.paymentsservice.repositories.PaymentRepository;
+import com.gui.estore.core.events.PaymentCancelledEvent;
 import com.gui.estore.core.events.PaymentProcessedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
@@ -28,6 +29,22 @@ public class PaymentEventsHandler {
         PaymentEntity paymentEntity = new PaymentEntity();
 
         BeanUtils.copyProperties(paymentProcessedEvent, paymentEntity);
+        paymentEntity.setStatus("PROCESADO");
+
+        try {
+            paymentRepository.save(paymentEntity);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    @EventHandler
+    public void on(PaymentCancelledEvent paymentCancelledEvent) {
+
+        PaymentEntity paymentEntity = paymentRepository.findByPaymentId(paymentCancelledEvent.getPaymentId()).orElseThrow(
+                () -> new IllegalArgumentException("Payment not found"));
+
+        paymentEntity.setStatus("CANCELADO");
 
         try {
             paymentRepository.save(paymentEntity);
@@ -46,6 +63,6 @@ public class PaymentEventsHandler {
 
     @ExceptionHandler(resultType = IllegalArgumentException.class)
     private void handle(IllegalArgumentException exception) throws IllegalArgumentException {
-//        throw IllegalArgumentException;
+        throw exception;
     }
 }

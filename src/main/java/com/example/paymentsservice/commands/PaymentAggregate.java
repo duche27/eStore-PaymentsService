@@ -1,6 +1,8 @@
 package com.example.paymentsservice.commands;
 
+import com.gui.estore.core.commands.CancelPaymentCommand;
 import com.gui.estore.core.commands.ProcessPaymentCommand;
+import com.gui.estore.core.events.PaymentCancelledEvent;
 import com.gui.estore.core.events.PaymentProcessedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -17,6 +19,7 @@ public class PaymentAggregate {
     @AggregateIdentifier
     private String paymentId;
     private String orderId;
+    private String status;
 
     public PaymentAggregate() { }
 
@@ -40,6 +43,27 @@ public class PaymentAggregate {
     public void on(PaymentProcessedEvent paymentProcessedEvent) {
         this.paymentId = paymentProcessedEvent.getPaymentId();
         this.orderId = paymentProcessedEvent.getOrderId();
+        this.status = "PROCESADO";
+    }
+
+    @CommandHandler
+    public void handle(CancelPaymentCommand cancelPaymentCommand) {
+
+        // creamos evento
+        PaymentCancelledEvent paymentCancelledEvent = PaymentCancelledEvent.builder()
+                .paymentId(cancelPaymentCommand.getPaymentId())
+                .orderId(cancelPaymentCommand.getOrderId())
+                .build();
+
+        // publicamos evento y mandamos al eventHandler y a SAGA
+        AggregateLifecycle.apply(paymentCancelledEvent);
+    }
+
+    @EventSourcingHandler
+    public void on(PaymentCancelledEvent paymentCancelledEvent) {
+        this.paymentId = paymentCancelledEvent.getPaymentId();
+        this.orderId = paymentCancelledEvent.getOrderId();
+        this.status = "CANCELADO";
     }
 
     private void hasCommandNullFields(ProcessPaymentCommand processPaymentCommand) {

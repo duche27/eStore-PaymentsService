@@ -20,4 +20,5 @@ public class PaymentEntity {
     @Column(unique = true)
     private String paymentId;
     private String orderId;
+    private String status;
 }
